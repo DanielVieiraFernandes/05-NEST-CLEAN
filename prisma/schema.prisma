@@ -20,6 +20,7 @@ model User {
   questions Question[]
   role      UserRole   @default(STUDENT)
   answers   Answer[]
+  comments  Comment[]
 
   @@map("users")
 }
@@ -38,7 +39,9 @@ model Question {
   bestAnswer   Answer? @relation("bestAnswer", fields: [bestAnswerId], references: [id])
   bestAnswerId String? @unique @map("best_answer_id")
 
-  answers Answer[]
+  answers      Answer[]
+  comments     Comment[]
+  attachements Attachement[]
 
   @@map("questions")
 }
@@ -49,11 +52,43 @@ model Answer {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
 
-  author       User      @relation(fields: [authorId], references: [id])
-  authorId     String    @map("author_id")
-  bestAnswerOn Question? @relation("bestAnswer")
-  Question     Question  @relation(fields: [questionId], references: [id])
-  questionId   String    @map("question_id")
+  author       User          @relation(fields: [authorId], references: [id])
+  authorId     String        @map("author_id")
+  bestAnswerOn Question?     @relation("bestAnswer")
+  question     Question      @relation(fields: [questionId], references: [id])
+  questionId   String        @map("question_id")
+  comments     Comment[]
+  attachements Attachement[]
 
   @@map("answers")
+}
+
+model Comment {
+  id         String    @id @default(uuid())
+  content    String
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime? @default(now()) @map("updated_at")
+  authorId   String    @map("author_id")
+  questionId String?   @map("question_id")
+  answerId   String?   @map("answer_id")
+
+  author   User      @relation(fields: [authorId], references: [id])
+  question Question? @relation(fields: [questionId], references: [id])
+  answer   Answer?   @relation(fields: [answerId], references: [id])
+
+  @@map("comments")
+}
+
+model Attachement {
+  id    String @id @default(uuid())
+  title String
+  url   String
+
+  questionId String? @map("question_id")
+  answerId   String? @map("answer_id")
+
+  question Question? @relation(fields: [questionId], references: [id])
+  answer   Answer?   @relation(fields: [answerId], references: [id])
+
+  @@map("attachements")
 }

@@ -1,18 +1,22 @@
-import { Either, right } from "@/core/either";
-import { Answer } from "../../enterprise/entities/answer";
-import { Question } from "../../enterprise/entities/question";
-import { UniqueEntityID } from "../../../../core/entities/unique-entity-id";
-import { AnswerRepository } from "../repositories/answers-repository";
-import { QuestionsRepository } from "../repositories/questions-repository";
+import { Either, right } from '@/core/either';
+import { Injectable } from '@nestjs/common';
+import { UniqueEntityID } from '../../../../core/entities/unique-entity-id';
+import { Answer } from '../../enterprise/entities/answer';
+import { Question } from '../../enterprise/entities/question';
+import { AnswerRepository } from '../repositories/answers-repository';
+import { QuestionsRepository } from '../repositories/questions-repository';
 
 interface FetchQuestionAnswersUseCaseRequest {
-    page: number;
-    questionId: string;
+  page: number;
+  questionId: string;
 }
 
-type FetchQuestionAnswersUseCaseResponse = Either<null, {
+type FetchQuestionAnswersUseCaseResponse = Either<
+  null,
+  {
     answers: Answer[];
-}>
+  }
+>;
 
 // DRY - Don't repeat yourself
 /**
@@ -22,14 +26,19 @@ type FetchQuestionAnswersUseCaseResponse = Either<null, {
  * se não vai precisar separar responsabilidades dentro da aplicação
  * ...
  */
-
+@Injectable()
 export class FetchQuestionAnswersUseCase {
-    constructor(private answersRepository: AnswerRepository){}
+  constructor(private answersRepository: AnswerRepository) {}
 
-    async execute({questionId,page}:FetchQuestionAnswersUseCaseRequest): Promise<FetchQuestionAnswersUseCaseResponse>{
-        const answers = await this.answersRepository.findManyByQuestionId(questionId,{page});
+  async execute({
+    questionId,
+    page,
+  }: FetchQuestionAnswersUseCaseRequest): Promise<FetchQuestionAnswersUseCaseResponse> {
+    const answers = await this.answersRepository.findManyByQuestionId(
+      questionId,
+      { page }
+    );
 
-       
-        return right({answers})
-    }
+    return right({ answers });
+  }
 }

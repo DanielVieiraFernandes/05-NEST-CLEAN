@@ -5,8 +5,8 @@ POST {{baseUrl}}/accounts
 Content-Type: application/json
 
 {
-    "name": "Daniel Fernandes",
-    "email": "daniel4@gmail.com",
+    "name": "Daniel Vieira Fernandes",
+    "email": "fernandesdanielvdieira@gmail.com",
     "password": "123456"
 }
 
@@ -18,7 +18,7 @@ POST {{baseUrl}}/sessions
 Content-Type: application/json
 
 {
-    "email": "daniel4@gmail.com",
+    "email": "fernandesdanielvdieira@gmail.com",
     "password": "123456"
 }
 

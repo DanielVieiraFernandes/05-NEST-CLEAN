@@ -7,7 +7,7 @@ export interface CommentProps {
     content: string,
     authorId: UniqueEntityID;
     createdAt: Date;
-    updatedAt?: Date 
+    updatedAt?: Date | null
 }
 
 export abstract class Comment<Props extends CommentProps> extends AggregateRoot<Props> {

@@ -56,4 +56,37 @@ DATABASE_URL=postgresql://user:password@localhost:5432/database
 yarn prisma migrate dev
 ```
 
-5. Inicie
+5. Inicie o servidor:
+
+```bash
+yarn start:dev
+```
+
+## 🧪 Testes
+
+Para rodar os testes unitários e de integração:
+
+```bash
+yarn test
+```
+
+## 🎯 Cobertura de Código
+
+```bash
+yarn test:cov
+```
+
+## 🛠️ Principais conceitos aplicados
+
+- Clean Architecture
+- Domain-Driven Design (DDD)
+- Test-Driven Development (TDD)
+- Princípios SOLID
+- Injeção de dependências
+
+## 📜 Licença
+
+Este projeto está sob a licença MIT.
+
+```
+

@@ -6,6 +6,7 @@ import { UniqueEntityID } from "../../../../core/entities/unique-entity-id";
 import { AnswerRepository } from "../repositories/answers-repository";
 import { QuestionCommentsRepository } from "../repositories/question-comments-repository";
 import { QuestionsRepository } from "../repositories/questions-repository";
+import { Injectable } from "@nestjs/common";
 
 interface FetchQuestionCommentsUseCaseRequest {
     page: number;
@@ -25,6 +26,7 @@ type FetchQuestionCommentsUseCaseResponse = Either<null, {
  * ...
  */
 
+@Injectable()
 export class FetchQuestionCommentsUseCase {
     constructor(private questionCommentsRepository: QuestionCommentsRepository) { }
 

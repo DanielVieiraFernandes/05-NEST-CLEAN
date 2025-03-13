@@ -6,7 +6,7 @@ import { InMemoryQuestionsRepository } from "test/repositories/in-memory-questio
 import { InMemoryQuestionAttachmentRepository } from "test/repositories/in-memory-question-attachments-repository";
 import { SendNotificationUseCase, SendNotificationUseCaseRequest, SendNotificationUseCaseResponse } from "../use-cases/send-notification";
 import { InMemoryNotificationsRepository } from "test/repositories/in-memory-notifications-repository";
-import { MakeQuestion } from "test/factories/make-question";
+import { makeQuestion as MakeQuestion } from "test/factories/make-question";
 import { MockInstance } from "vitest";
 import { waitFor } from "test/utils/wait-for";
 

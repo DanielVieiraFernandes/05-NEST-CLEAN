@@ -1,5 +1,5 @@
 import { InMemoryQuestionsRepository } from "test/repositories/in-memory-questions-repository";
-import { MakeQuestion } from "test/factories/make-question";
+import { makeQuestion as MakeQuestion } from "test/factories/make-question";
 import { FetchRecentQuestionsUseCase } from "./fetch-recent-questions";
 import { InMemoryQuestionAttachmentRepository } from "test/repositories/in-memory-question-attachments-repository";
 

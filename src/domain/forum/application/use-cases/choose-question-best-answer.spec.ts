@@ -3,7 +3,7 @@ import { MakeAnswer } from "test/factories/make-answer";
 import { UniqueEntityID } from "../../../../core/entities/unique-entity-id";
 import { InMemoryQuestionsRepository } from "test/repositories/in-memory-questions-repository";
 import { ChooseQuestionBestAnswerUseCase } from "./choose-question-best-answer";
-import { MakeQuestion } from "test/factories/make-question";
+import { makeQuestion as MakeQuestion } from "test/factories/make-question";
 import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
 import { InMemoryAnswerAttachmentRepository } from "test/repositories/in-memory-answer-attachements-repository";
 import { InMemoryQuestionAttachmentRepository } from "test/repositories/in-memory-question-attachments-repository";

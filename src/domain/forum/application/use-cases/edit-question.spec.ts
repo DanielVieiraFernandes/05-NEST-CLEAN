@@ -1,5 +1,5 @@
 import { InMemoryQuestionsRepository } from "test/repositories/in-memory-questions-repository";
-import { MakeQuestion } from "test/factories/make-question";
+import { makeQuestion as MakeQuestion } from "test/factories/make-question";
 import { EditQuestionUseCase } from "./edit-question";
 import { UniqueEntityID } from "../../../../core/entities/unique-entity-id";
 import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";

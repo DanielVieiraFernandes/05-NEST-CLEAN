@@ -1,4 +1,5 @@
 import { PaginationParams } from '@/core/repositories/pagination-params';
+import { AnswerAttachmentrepository } from '@/domain/forum/application/repositories/answer-attachments-repository';
 import { AnswerRepository } from '@/domain/forum/application/repositories/answers-repository';
 import { Answer } from '@/domain/forum/enterprise/entities/answer';
 import { Injectable } from '@nestjs/common';
@@ -7,7 +8,10 @@ import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class PrismaAnswerRepository implements AnswerRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private answerAttachmentsRepoisotory: AnswerAttachmentrepository
+  ) {}
 
   async create(answer: Answer): Promise<void> {
     const data = PrismaAnswerMapper.toPrisma(answer);
@@ -15,6 +19,10 @@ export class PrismaAnswerRepository implements AnswerRepository {
     await this.prisma.answer.create({
       data,
     });
+
+    await this.answerAttachmentsRepoisotory.createMany(
+      answer.attachment.getItems()
+    );
   }
   async delete(answer: Answer): Promise<void> {
     await this.prisma.answer.delete({
@@ -38,12 +46,22 @@ export class PrismaAnswerRepository implements AnswerRepository {
   async save(answer: Answer): Promise<void> {
     const data = PrismaAnswerMapper.toPrisma(answer);
 
-    await this.prisma.answer.update({
-      data,
-      where: {
-        id: data.id,
-      },
-    });
+    await Promise.all([
+      this.prisma.answer.update({
+        data,
+        where: {
+          id: data.id,
+        },
+      }),
+
+      this.answerAttachmentsRepoisotory.createMany(
+        answer.attachment.getNewItems()
+      ),
+
+      this.answerAttachmentsRepoisotory.deleteMany(
+        answer.attachment.getRemovedItems()
+      ),
+    ]);
   }
   async findManyByQuestionId(
     questionId: string,

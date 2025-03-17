@@ -5,6 +5,7 @@ import { UniqueEntityID } from "../../../../core/entities/unique-entity-id";
 import { NotAllowedError } from "@/core/errors/errors/not-allowed-error";
 import { InMemoryQuestionAttachmentRepository } from "test/repositories/in-memory-question-attachments-repository";
 import { MakeQuestionAttachment } from "test/factories/make-question-attachment";
+import exp from "constants";
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository;
 let inMemoryQuestionAttachmentRepository: InMemoryQuestionAttachmentRepository;
@@ -87,4 +88,48 @@ describe('Delete question', () => {
         expect(result.isLeft()).toBe(true)
         expect(result.value).toBeInstanceOf(NotAllowedError)
     })
+
+    it('should sync new and removed attachments when editing a question', async () => {
+
+        const newQuestion = MakeQuestion({
+            authorId: new UniqueEntityID('author-1')
+        }, new UniqueEntityID('question-1'));
+
+
+        console.log(newQuestion);
+
+        await inMemoryQuestionsRepository.create(newQuestion)
+
+        inMemoryQuestionAttachmentRepository.items.push(
+            MakeQuestionAttachment({
+                questionId: newQuestion.id,
+                attachmentId: new UniqueEntityID('1')
+            }),
+            MakeQuestionAttachment({
+                questionId: newQuestion.id,
+                attachmentId: new UniqueEntityID('2')
+            }),
+        )
+
+        const result = await sut.execute({
+            questionId: newQuestion.id.toValue(),
+            authorId: 'author-1',
+            content: 'Conteúdo-teste',
+            title: 'Pergunta-teste',
+            attachmentsIds: ['1', '3']
+        })
+
+        expect(result.isRight()).toBe(true)
+     expect(inMemoryQuestionAttachmentRepository.items).toHaveLength(2)
+     expect(inMemoryQuestionAttachmentRepository.items).toEqual(
+       expect.arrayContaining([
+         expect.objectContaining({
+           attachmentId: new UniqueEntityID('1'),
+         }),
+         expect.objectContaining({
+           attachmentId: new UniqueEntityID('3'),
+         }),
+       ]),
+     )
+   })
 })

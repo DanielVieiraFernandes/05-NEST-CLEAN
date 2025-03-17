@@ -1,3 +1,4 @@
+import { AnswerAttachment } from '@/domain/forum/enterprise/entities/answer-attachement';
 import { Attachment } from '@/domain/forum/enterprise/entities/attachement';
 import { Prisma } from '@prisma/client';
 

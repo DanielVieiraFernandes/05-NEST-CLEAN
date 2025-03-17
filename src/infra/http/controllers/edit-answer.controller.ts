@@ -13,6 +13,7 @@ import { z } from 'zod';
 
 const editAnswerBodySchema = z.object({
   content: z.string(),
+  attachments: z.array(z.string().uuid()).default([]),
 });
 
 type EditAnswerBodySchema = z.infer<typeof editAnswerBodySchema>;
@@ -29,13 +30,13 @@ export class EditAnswerController {
     body: EditAnswerBodySchema,
     @Param('id') answerId: string
   ) {
-    const { content } = body;
+    const { content, attachments } = body;
     const { sub: userId } = user;
 
     const result = await this.editAnswer.execute({
       content,
       authorId: userId,
-      attachmentsIds: [],
+      attachmentsIds: attachments,
       answerId,
     });
 

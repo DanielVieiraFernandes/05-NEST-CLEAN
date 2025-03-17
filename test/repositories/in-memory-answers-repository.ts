@@ -1,48 +1,64 @@
-import { DomainEvents } from "@/core/events/domain-events";
-import { PaginationParams } from "@/core/repositories/pagination-params";
-import { AnswerAttachmentrepository } from "@/domain/forum/application/repositories/answer-attachments-repository";
-import { AnswerRepository } from "@/domain/forum/application/repositories/answers-repository";
-import { Answer } from "@/domain/forum/enterprise/entities/answer";
+import { DomainEvents } from '@/core/events/domain-events';
+import { PaginationParams } from '@/core/repositories/pagination-params';
+import { AnswerAttachmentrepository } from '@/domain/forum/application/repositories/answer-attachments-repository';
+import { AnswerRepository } from '@/domain/forum/application/repositories/answers-repository';
+import { Answer } from '@/domain/forum/enterprise/entities/answer';
 
 export class InMemoryAnswersRepository implements AnswerRepository {
-    
+  public items: Answer[] = [];
+  constructor(
+    private answerAttachmentsRepository: AnswerAttachmentrepository
+  ) {}
 
-    public items: Answer[] = []
-    constructor(private answerAttachmentsrepository: AnswerAttachmentrepository){}
+  async findManyByQuestionId(
+    questionId: string,
+    { page }: PaginationParams
+  ): Promise<Answer[]> {
+    const answers = this.items
+      .filter(item => item.questionId.toString() === questionId)
+      .slice((page - 1) * 20, page * 20);
 
+    return answers;
+  }
 
-    async findManyByQuestionId(questionId: string, {page}: PaginationParams): Promise<Answer[]> {
-        const answers = this.items.filter(item => item.questionId.toString() === questionId).slice((page - 1) * 20, page * 20)
+  async delete(answer: Answer) {
+    const itemIndex = this.items.findIndex(item => item.id === answer.id);
 
-        return answers;
+    this.items.splice(itemIndex, 1);
+    this.answerAttachmentsRepository.deleteManyAnswerById(answer.id.toString());
+  }
+
+  async findById(id: string) {
+    const answer = this.items.find(item => item.id.toString() === id);
+
+    if (!answer) {
+      return null;
     }
 
-    async delete(answer: Answer) {
-        const itemIndex = this.items.findIndex(item => item.id === answer.id)
+    return answer;
+  }
 
-        this.items.splice(itemIndex, 1);
-        this.answerAttachmentsrepository.deleteManyAnswerById(answer.id.toString());
-    }
+  async create(answer: Answer): Promise<void> {
+    this.items.push(answer);
 
-    async findById(id: string) {
-        const answer = this.items.find(item => item.id.toString() === id)
+    await this.answerAttachmentsRepository.createMany(
+      answer.attachment.getItems()
+    );
 
-        if (!answer) {
-            return null;
-        }
+    DomainEvents.dispatchEventsForAggregate(answer.id);
+  }
 
-        return answer;
-    }
+  async save(answer: Answer) {
+    const itemIndex = this.items.findIndex(item => item.id === answer.id);
 
-    async create(answer: Answer): Promise<void> {
-        this.items.push(answer)
+    await this.answerAttachmentsRepository.deleteMany(
+      answer.attachment.getRemovedItems()
+    );
 
-        DomainEvents.dispatchEventsForAggregate(answer.id)
-    }
+    await this.answerAttachmentsRepository.createMany(
+      answer.attachment.getNewItems()
+    );
 
-    async save(answer: Answer) {
-        const itemIndex = this.items.findIndex(item => item.id === answer.id)
-
-        this.items[itemIndex] = answer
-    }
+    this.items[itemIndex] = answer;
+  }
 }

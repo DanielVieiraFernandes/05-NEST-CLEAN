@@ -1,4 +1,5 @@
 import { PaginationParams } from '@/core/repositories/pagination-params';
+import { QuestionAttachmentrepository } from '@/domain/forum/application/repositories/question-attachments-repository';
 import { QuestionsRepository } from '@/domain/forum/application/repositories/questions-repository';
 import { Question } from '@/domain/forum/enterprise/entities/question';
 import { Injectable } from '@nestjs/common';
@@ -7,13 +8,21 @@ import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class PrismaQuestionsRepository implements QuestionsRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private questionAttachmentsRepository: QuestionAttachmentrepository
+  ) {}
+
   async create(question: Question): Promise<void> {
     const data = PrismaQuestionMapper.toPrisma(question);
 
     await this.prisma.question.create({
       data,
     });
+
+    await this.questionAttachmentsRepository.createMany(
+      question.attachment.getItems()
+    );
   }
 
   async findBySlug(slug: string): Promise<Question | null> {
@@ -28,6 +37,7 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
 
     return PrismaQuestionMapper.toDomain(question);
   }
+
   async findById(id: string): Promise<Question | null> {
     const question = await this.prisma.question.findUnique({
       where: {
@@ -40,6 +50,7 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
 
     return PrismaQuestionMapper.toDomain(question);
   }
+
   async delete(question: Question): Promise<void> {
     const data = PrismaQuestionMapper.toPrisma(question);
 
@@ -49,15 +60,26 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
       },
     });
   }
+
   async save(question: Question): Promise<void> {
     const data = PrismaQuestionMapper.toPrisma(question);
 
-    await this.prisma.question.update({
-      data,
-      where: {
-        id: data.id,
-      },
-    });
+    await Promise.all([
+      this.prisma.question.update({
+        data,
+        where: {
+          id: data.id,
+        },
+      }),
+
+      this.questionAttachmentsRepository.createMany(
+        question.attachment.getNewItems()
+      ),
+
+      this.questionAttachmentsRepository.deleteMany(
+        question.attachment.getRemovedItems()
+      ),
+    ]);
   }
 
   async findManyRecent(params: PaginationParams): Promise<Question[]> {

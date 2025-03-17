@@ -1,22 +1,20 @@
-import { Either, right } from "@/core/either";
-import { Answer } from "../../enterprise/entities/answer";
-import { Question } from "../../enterprise/entities/question";
-import { QuestionComment } from "../../enterprise/entities/question-comment";
-import { UniqueEntityID } from "../../../../core/entities/unique-entity-id";
-import { AnswerRepository } from "../repositories/answers-repository";
-import { QuestionCommentsRepository } from "../repositories/question-comments-repository";
-import { QuestionsRepository } from "../repositories/questions-repository";
-import { Injectable } from "@nestjs/common";
+import { Either, right } from '@/core/either';
+import { Injectable } from '@nestjs/common';
+import { QuestionComment } from '../../enterprise/entities/question-comment';
+import { CommentWithAuthor } from '../../enterprise/entities/value-objects/comment-with-author';
+import { QuestionCommentsRepository } from '../repositories/question-comments-repository';
 
 interface FetchQuestionCommentsUseCaseRequest {
-    page: number;
-    questionId: string;
+  page: number;
+  questionId: string;
 }
 
-type FetchQuestionCommentsUseCaseResponse = Either<null, {
-    questionComments: QuestionComment[];
-}
->
+type FetchQuestionCommentsUseCaseResponse = Either<
+  null,
+  {
+    comments: CommentWithAuthor[];
+  }
+>;
 // DRY - Don't repeat yourself
 /**
  * não quer dizer que você não possa repetir código
@@ -28,13 +26,20 @@ type FetchQuestionCommentsUseCaseResponse = Either<null, {
 
 @Injectable()
 export class FetchQuestionCommentsUseCase {
-    constructor(private questionCommentsRepository: QuestionCommentsRepository) { }
+  constructor(private questionCommentsRepository: QuestionCommentsRepository) {}
 
-    async execute({ questionId, page }: FetchQuestionCommentsUseCaseRequest): Promise<FetchQuestionCommentsUseCaseResponse> {
-        const questionComments = await this.questionCommentsRepository.findManyByQuestionId(questionId
-            , { page });
+  async execute({
+    questionId,
+    page,
+  }: FetchQuestionCommentsUseCaseRequest): Promise<FetchQuestionCommentsUseCaseResponse> {
+    const comments =
+      await this.questionCommentsRepository.findManyByQuestionIdWithAuthor(
+        questionId,
+        {
+          page,
+        }
+      );
 
-
-        return right({questionComments})
-    }
+    return right({ comments });
+  }
 }

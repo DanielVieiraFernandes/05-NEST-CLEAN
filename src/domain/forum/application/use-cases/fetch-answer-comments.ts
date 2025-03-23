@@ -1,18 +1,21 @@
-import { Either, right } from "@/core/either";
-import { Answer } from "../../enterprise/entities/answer";
-import { AnswerComment } from "../../enterprise/entities/answer-comment";
-import { AnswerCommentsRepository } from "../repositories/answers-comments-repository";
-import { Injectable } from "@nestjs/common";
+import { Either, right } from '@/core/either';
+import { Injectable } from '@nestjs/common';
+import { Answer } from '../../enterprise/entities/answer';
+import { AnswerComment } from '../../enterprise/entities/answer-comment';
+import { CommentWithAuthor } from '../../enterprise/entities/value-objects/comment-with-author';
+import { AnswerCommentsRepository } from '../repositories/answers-comments-repository';
 
 interface FetchAnswerCommentsUseCaseRequest {
-    page: number;
-    answerId: string;
+  page: number;
+  answerId: string;
 }
 
-type FetchAnswerCommentsUseCaseResponse = Either<null,{
-    answerComments: AnswerComment[];
-}
->
+type FetchAnswerCommentsUseCaseResponse = Either<
+  null,
+  {
+    comments: CommentWithAuthor[];
+  }
+>;
 // DRY - Don't repeat yourself
 /**
  * não quer dizer que você não possa repetir código
@@ -24,13 +27,18 @@ type FetchAnswerCommentsUseCaseResponse = Either<null,{
 
 @Injectable()
 export class FetchAnswerCommentsUseCase {
-    constructor(private answerCommentsRepository: AnswerCommentsRepository) { }
+  constructor(private answerCommentsRepository: AnswerCommentsRepository) {}
 
-    async execute({ answerId, page }: FetchAnswerCommentsUseCaseRequest): Promise<FetchAnswerCommentsUseCaseResponse> {
-        const answerComments = await this.answerCommentsRepository.findManyByAnswerId(answerId
-            , { page });
+  async execute({
+    answerId,
+    page,
+  }: FetchAnswerCommentsUseCaseRequest): Promise<FetchAnswerCommentsUseCaseResponse> {
+    const comments =
+      await this.answerCommentsRepository.findManyByAnswerIdWithAuthor(
+        answerId,
+        { page }
+      );
 
-
-        return right({answerComments})
-    }
+    return right({ comments });
+  }
 }

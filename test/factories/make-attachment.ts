@@ -33,7 +33,7 @@ export class AttachmentFactory {
   ): Promise<Attachment> {
     const attachment = MakeAttachment(data);
 
-    await this.prisma.attachement.create({
+    await this.prisma.attachment.create({
       data: PrismaAttachmentMapper.toPrisma(attachment),
     });
 

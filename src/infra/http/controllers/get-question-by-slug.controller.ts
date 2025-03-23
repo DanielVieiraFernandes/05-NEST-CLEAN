@@ -1,14 +1,11 @@
 import { GetQuestionBySlugUseCase } from '@/domain/forum/application/use-cases/get-question-by-slug';
-import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
 import {
   BadRequestException,
   Controller,
   Get,
-  Param,
-  Query,
+  Param
 } from '@nestjs/common';
-import { z } from 'zod';
-import { QuestionPresenter } from '../presenters/question-presenter';
+import { QuestionDetailsPresenter } from '../presenters/question-details-presenter';
 
 @Controller('/questions/:slug')
 export class GetQuestionBySlugController {
@@ -25,7 +22,7 @@ export class GetQuestionBySlugController {
     }
 
     return {
-      question: QuestionPresenter.toHTTP(result.value.question),
+      question: QuestionDetailsPresenter.toHTTP(result.value.question),
     };
   }
 }

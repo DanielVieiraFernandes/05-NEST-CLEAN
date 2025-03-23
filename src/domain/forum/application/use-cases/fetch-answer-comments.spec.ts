@@ -1,55 +1,74 @@
-import { FetchAnswerCommentsUseCase } from "./fetch-answer-comments";
-import { MakeAnswer } from "test/factories/make-answer";
-import { UniqueEntityID } from "../../../../core/entities/unique-entity-id";
-import { InMemoryAnswerCommentRepository } from "test/repositories/in-memory-answer-comments-repository";
-import { MakeAnswerComment } from "test/factories/make-answer-comment";
+import { MakeAnswer } from 'test/factories/make-answer';
+import { MakeAnswerComment } from 'test/factories/make-answer-comment';
+import { MakeStudent } from 'test/factories/make-student';
+import { InMemoryAnswerCommentRepository } from 'test/repositories/in-memory-answer-comments-repository';
+import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
+import { UniqueEntityID } from '../../../../core/entities/unique-entity-id';
+import { FetchAnswerCommentsUseCase } from './fetch-answer-comments';
 
 let inMemoryAnswerCommentRepository: InMemoryAnswerCommentRepository;
+let inMemoryStudentsRepository: InMemoryStudentsRepository;
 let sut: FetchAnswerCommentsUseCase;
 
 describe('Fetch answer comments', () => {
+  beforeEach(() => {
+    inMemoryStudentsRepository = new InMemoryStudentsRepository();
+    inMemoryAnswerCommentRepository = new InMemoryAnswerCommentRepository(
+      inMemoryStudentsRepository
+    );
+    sut = new FetchAnswerCommentsUseCase(inMemoryAnswerCommentRepository); // system under test
+  });
 
-    beforeEach(() => {
-        inMemoryAnswerCommentRepository = new InMemoryAnswerCommentRepository();
-        sut = new FetchAnswerCommentsUseCase(inMemoryAnswerCommentRepository) // system under test
-    })
+  it('Should be able to fetch answer comments', async () => {
+    const student = MakeStudent({
+      name: 'John Doe',
+    });
 
-    it('Should be able to fetch answer comments', async () => {
+    inMemoryStudentsRepository.items.push(student);
 
-       await inMemoryAnswerCommentRepository.create(
+    const comment1 = MakeAnswerComment({
+      answerId: new UniqueEntityID('answer-01'),
+      authorId: student.id,
+    });
+    const comment2 = MakeAnswerComment({
+      answerId: new UniqueEntityID('answer-01'),
+      authorId: student.id,
+    });
+    const comment3 = MakeAnswerComment({
+      answerId: new UniqueEntityID('answer-01'),
+      authorId: student.id,
+    });
+
+    await inMemoryAnswerCommentRepository.create(comment1);
+    await inMemoryAnswerCommentRepository.create(comment2);
+    await inMemoryAnswerCommentRepository.create(comment3);
+
+    const result = await sut.execute({
+      answerId: 'answer-01',
+      page: 1,
+    });
+
+    expect(result.value?.comments).toHaveLength(3);
+  });
+
+  it('Should be able to fetch paginated answer comments', async () => {
+
+    const student = MakeStudent({
+        name: 'John Doe',
+      });
+  
+      inMemoryStudentsRepository.items.push(student);
+    for (let i = 1; i <= 22; i++) {
+      await inMemoryAnswerCommentRepository.create(
         MakeAnswerComment({
-            answerId: new UniqueEntityID('answer-01')
+          answerId: new UniqueEntityID('answer-01'),
+          authorId: student.id
         })
-       )
-       await inMemoryAnswerCommentRepository.create(
-        MakeAnswerComment({
-            answerId: new UniqueEntityID('answer-01')
-        })
-       )
-       await inMemoryAnswerCommentRepository.create(
-        MakeAnswerComment({
-            answerId: new UniqueEntityID('answer-01')
-        })
-       )
+      );
+    }
 
-      const result = await sut.execute({
-        answerId: 'answer-01',
-        page: 1
-       })
+    const result = await sut.execute({ page: 2, answerId: 'answer-01' });
 
-        expect(result.value?.answerComments).toHaveLength(3)
-    })
-
-    it('Should be able to fetch paginated answer comments', async () => {
-
-        for (let i = 1; i <= 22; i++){
-            await inMemoryAnswerCommentRepository.create(MakeAnswerComment({
-                answerId: new UniqueEntityID('answer-01')
-            }))
-        }
-
-        const result = await sut.execute({page: 2, answerId: 'answer-01'})
-
-        expect(result.value?.answerComments).toHaveLength(2);
-    })
-})
+    expect(result.value?.comments).toHaveLength(2);
+  });
+});

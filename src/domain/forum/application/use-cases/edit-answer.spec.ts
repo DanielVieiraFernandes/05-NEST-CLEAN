@@ -124,6 +124,7 @@ describe('Delete answer', () => {
     expect(result.isRight()).toBe(true);
     console.log(inMemoryAnswerAttachmentRepository.items);
     expect(inMemoryAnswerAttachmentRepository.items).toHaveLength(2);
+    console.log(`Array contendo: ${inMemoryAnswerAttachmentRepository.items}`)
     expect(inMemoryAnswerAttachmentRepository.items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

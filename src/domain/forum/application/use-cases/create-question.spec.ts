@@ -1,18 +1,26 @@
+import { InMemoryAttachmentsRepository } from 'test/repositories/in-memory-attachments-repository';
 import { InMemoryQuestionAttachmentRepository } from 'test/repositories/in-memory-question-attachments-repository';
 import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository';
+import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository';
 import { UniqueEntityID } from '../../../../core/entities/unique-entity-id';
 import { CreateQuestionUseCase } from './create-question';
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository;
 let inMemoryQuestionAttachmentRepository: InMemoryQuestionAttachmentRepository;
+let inMemoryAttachmentRepository: InMemoryAttachmentsRepository;
+let inMemoryStudentRepository: InMemoryStudentsRepository;
 let sut: CreateQuestionUseCase;
 
 describe('Create Question', () => {
   beforeEach(() => {
     inMemoryQuestionAttachmentRepository =
       new InMemoryQuestionAttachmentRepository();
+    inMemoryAttachmentRepository = new InMemoryAttachmentsRepository();
+    inMemoryStudentRepository = new InMemoryStudentsRepository();
     inMemoryQuestionsRepository = new InMemoryQuestionsRepository(
-      inMemoryQuestionAttachmentRepository
+      inMemoryQuestionAttachmentRepository,
+      inMemoryAttachmentRepository,
+      inMemoryStudentRepository
     );
     sut = new CreateQuestionUseCase(inMemoryQuestionsRepository); // system under test
   });
@@ -50,10 +58,10 @@ describe('Create Question', () => {
       title: 'Nova pergunta',
       content: 'Conteúdo da pergunta',
       attachmentsIds: ['1', '2'],
-    })
+    });
 
-    expect(result.isRight()).toBe(true)
-    expect(inMemoryQuestionAttachmentRepository.items).toHaveLength(2)
+    expect(result.isRight()).toBe(true);
+    expect(inMemoryQuestionAttachmentRepository.items).toHaveLength(2);
     expect(inMemoryQuestionAttachmentRepository.items).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -62,7 +70,7 @@ describe('Create Question', () => {
         expect.objectContaining({
           attachmentId: new UniqueEntityID('2'),
         }),
-      ]),
-    )
-  })
+      ])
+    );
+  });
 });

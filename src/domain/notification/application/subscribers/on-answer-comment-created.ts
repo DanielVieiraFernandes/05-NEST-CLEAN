@@ -3,7 +3,9 @@ import { EventHandler } from "@/core/events/event-handler";
 import { SendNotificationUseCase } from "../use-cases/send-notification";
 import { AnswerCommentCreatedEvent } from "@/domain/forum/enterprise/entities/events/answer-comment-created-event";
 import { AnswerCommentsRepository } from "@/domain/forum/application/repositories/answers-comments-repository";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class OnAnswerCommentCreated implements EventHandler {
     constructor (
         private answerCommentRepository: AnswerCommentsRepository,

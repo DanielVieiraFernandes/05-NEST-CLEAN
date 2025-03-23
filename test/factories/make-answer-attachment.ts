@@ -31,7 +31,7 @@ export class AnswerAttachmentFactory {
   ): Promise<AnswerAttachment> {
     const answerAttachment = MakeAnswerAttachment(data);
 
-    await this.prisma.attachement.update({
+    await this.prisma.attachment.update({
       where: {
         id: answerAttachment.attachmentId.toString(),
       },

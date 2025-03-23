@@ -1,3 +1,4 @@
+import { DomainEvents } from '@/core/events/domain-events';
 import { PaginationParams } from '@/core/repositories/pagination-params';
 import { AnswerAttachmentrepository } from '@/domain/forum/application/repositories/answer-attachments-repository';
 import { AnswerRepository } from '@/domain/forum/application/repositories/answers-repository';
@@ -23,6 +24,8 @@ export class PrismaAnswerRepository implements AnswerRepository {
     await this.answerAttachmentsRepoisotory.createMany(
       answer.attachment.getItems()
     );
+
+    DomainEvents.dispatchEventsForAggregate(answer.id);
   }
   async delete(answer: Answer): Promise<void> {
     await this.prisma.answer.delete({
@@ -62,6 +65,8 @@ export class PrismaAnswerRepository implements AnswerRepository {
         answer.attachment.getRemovedItems()
       ),
     ]);
+
+    DomainEvents.dispatchEventsForAggregate(answer.id);
   }
   async findManyByQuestionId(
     questionId: string,
